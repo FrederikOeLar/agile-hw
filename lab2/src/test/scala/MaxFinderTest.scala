@@ -16,6 +16,10 @@ class MaxFinderTest extends AnyFlatSpec with ChiselScalatestTester with Matchers
         for (i <- vec.indices) {
           dut.io.in(i).poke(vec(i).U)
         }
+
+        val maxIndices = vec.indices.filter(i => vec(i) == vec.max) //Any index can be true if all values are the same
+        val maxIdxFromDUT = dut.io.maxIdx.peek().litValue
+        assert(maxIndices.contains(maxIdxFromDUT.toInt))
         dut.io.max.expect(expected.U)
       }
     }

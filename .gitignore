@@ -8,3 +8,5 @@
 /lab2/target
 /lab2/test_run_dir
 lab2/MaxFinder.sv
+lab2/MaxFinder2.sv
+lab2/MaxFinder3.sv

@@ -20,3 +20,7 @@ class MaxFinder(val n: Int, val width: Int) extends Module {
   io.max := maxZip._1
   io.maxIdx := maxZip._2
 }
+
+object Max extends App {
+  emitVerilog(new MaxFinder(4, 8))
+}

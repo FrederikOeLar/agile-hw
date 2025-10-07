@@ -47,7 +47,22 @@ Overall, the course will provide the students with a comprehensive understanding
 ### Week 3: Simple Generators
 
  * [Slides](03_simp_gen.pdf)
- * Labs: Lab: [lab4](lab4) and [lab5](lab5)
+ * Labs: [lab4](lab4) and [lab5](lab5)
+
+### Week 4: Digital Design with Clash
+
+ * Slides
+ * Lab: [Clash Lab on DTU Learn](https://learn.inside.dtu.dk/d2l/le/lessons/270912/topics/1074403)
+
+ ### Week 5: Generators
+
+ * [Slides](05_generators.pdf)
+ * Project presentations
+
+ ### Week 6: Testing and CI
+
+ * [Slides](05_testing_and_ci.pdf)
+ * Lab: [lab6](lab6)
 
 ## Chattutor
 

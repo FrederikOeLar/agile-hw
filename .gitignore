@@ -10,3 +10,10 @@
 lab2/MaxFinder.sv
 lab2/MaxFinder2.sv
 lab2/MaxFinder3.sv
+/.idea
+/lab6/.bsp
+/lab6/.idea
+/lab6/project/target
+/lab6/project
+/lab6/target
+lab6/build.sbt

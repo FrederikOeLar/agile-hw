@@ -3,7 +3,6 @@ import chiseltest._
 import chiseltest.formal._
 import org.scalatest.flatspec.AnyFlatSpec
 
-
 // Main test class
 class SimpleVerify extends AnyFlatSpec with ChiselScalatestTester with Formal {
 

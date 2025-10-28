@@ -17,3 +17,15 @@ lab2/MaxFinder3.sv
 /lab6/project
 /lab6/target
 lab6/build.sbt
+lab7/.bsp/sbt.json
+/lab7/.idea
+/lab7/project/target
+/lab7/target
+/lab7/test_run_dir
+lab7/project/build.properties
+/lab8/.bsp
+/lab8/.idea
+/lab8/project/target
+/lab8/target
+/lab8/test_run_dir
+/lab8/project

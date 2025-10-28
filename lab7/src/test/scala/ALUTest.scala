@@ -3,12 +3,80 @@ import chiseltest._
 import org.scalatest.flatspec.AnyFlatSpec
 
 trait ALUImpl {
-  ???
+  def compute(
+    in_sel: UInt,
+    in_op1: UInt,
+    in_op2: UInt,
+    in_op1_signed: SInt,
+    in_op2_signed: SInt,
+    in_signed: Bool
+  ): (UInt, SInt, Vec[Bool])
 }
 
 
 class ALUModel extends ALUImpl {
-  ???
+  def compute(in_sel: UInt,
+              in_op1: UInt,
+              in_op2: UInt,
+              in_op1_signed: SInt,
+              in_op2_signed: SInt,
+              in_signed: Bool): (UInt, SInt, Vec[Bool]) = {
+
+    var unsignedRes = 0.asUInt
+    var signedRes = 0.asSInt
+
+    in_sel match {
+      case 0 => {
+        unsignedRes = (~in_op1).asUInt
+        signedRes = (~in_op1_signed).asSInt
+      }
+      case 1 => {
+        unsignedRes = in_op1 & in_op2
+        signedRes = in_op1_signed & in_op2_signed
+      }
+      case 2 => {
+        unsignedRes = in_op1 | in_op2
+        signedRes = in_op1_signed | in_op2_signed
+      }
+      case 3 => {
+        unsignedRes = in_op1 ^ in_op2
+        signedRes = in_op1_signed ^ in_op2_signed
+      }
+      case 4 => {
+        unsignedRes = in_op1 + in_op2
+        signedRes = in_op1_signed + in_op2_signed
+      }
+      case 5 => {
+        unsignedRes = in_op1 - in_op2
+        signedRes = in_op1_signed - in_op2_signed
+      }
+      case 6 => {
+        unsignedRes = in_op1 / in_op2
+        signedRes = in_op1_signed / in_op2_signed
+      }
+      case 7 => {
+        unsignedRes = in_op1 % in_op2
+        signedRes = in_op1_signed % in_op2_signed
+      }
+      case 8 => {
+        unsignedRes = in_op1 * in_op2
+        signedRes = in_op1_signed * in_op2_signed
+      }
+      case 9 => {
+        unsignedRes = (in_op1 >> (in_op2 & 0x1F.asUInt)).asUInt
+        signedRes = (in_op1_signed >> (in_op2_signed & 0x1F.asSInt)).asSInt
+      }
+      case 10 => {
+        unsignedRes = (in_op1 << (in_op2 & 0x1F.asUInt)).asUInt
+        signedRes = (in_op1_signed << (in_op2_signed & 0x1F.asSInt)).asSInt
+      }
+      case _ => {} // Default case does nothing
+    }
+
+    (unsignedRes, signedRes, 0)
+
+  }
+
 }
 
 // Chisel implementation wrapper

@@ -33,7 +33,10 @@ class MyQueue[T <: Data](val depth: Int, val gen: T) extends Module {
   }
 
   // This is just a dummy connection, replace it with your Queue implementation
-  io.enq <> io.deq
+  //io.enq <> io.deq
+  for (i <- 0 to depth) {
+
+  }
 
   // This is Scala code that runs at elaboration time
   require(depth > 0, "Depth must be greater than 0")

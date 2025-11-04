@@ -76,7 +76,9 @@ Overall, the course will provide the students with a comprehensive understanding
 
  ### Week 9: Spade
 
+  * [Slides](spade.pdf)
   * Insall Spade, see [Spade Setup](https://docs.spade-lang.org/agile/quick_setup.html)
+  * Lab: [https://docs.spade-lang.org/agile/intro.html]
  
 ## Group Projects
 

@@ -77,9 +77,20 @@ Overall, the course will provide the students with a comprehensive understanding
  ### Week 9: Spade
 
   * [Slides](spade.pdf)
-  * Insall Spade, see [Spade Setup](https://docs.spade-lang.org/agile/quick_setup.html)
+  * Install Spade, see [Spade Setup](https://docs.spade-lang.org/agile/quick_setup.html)
   * Lab: [https://docs.spade-lang.org/agile/intro.html]
  
+ ### Week 10: Mixed Topics
+
+  * [Slides](10_mixed.pdf)
+  * Lab: Project presentation and demo
+
+### Week 11: Chisel in Research
+
+ * [Slides](tbd.pdf)
+ * Lab: [lab11](lab11)
+
+
 ## Group Projects
 
  1. [Computer Vision for image classification](https://github.com/WAAAlex1/Agile-hw-dev-project-ComVis)

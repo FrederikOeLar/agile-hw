@@ -113,12 +113,12 @@ class CsrAdapter(descriptionSheetPath: String) extends Module {
 }
 ```
 
-### Using the python generator
+### Using the Python generator
 
-A reference implementation of the generator is provided in Python. You can run it as follows:
+A reference implementation of the generator is provided in Python. You need to have the `pandas` and `openpyxl` packages installed. You can run it as follows:
 
 ```bash
-python3 generate_csr.py soc.xlsx
+python3 csr_adapter_gen.py soc.xlsx
 ```
 
 Take a look at the Excel source file `soc.xlsx`, the generated Verilog file `soc_adapter.sv` and finally the generator itself.

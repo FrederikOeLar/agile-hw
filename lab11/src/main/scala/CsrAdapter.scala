@@ -29,6 +29,8 @@ class CsrAdapter(descriptionSheetPath: String) extends Module {
 
 
   apb := DontCare
+  apb.pready := 1.B
+  apb.pslverr := 1.B
   csr := DontCare
 
 }

@@ -91,10 +91,10 @@ case class Register(name: String, offset: Int, fields: Seq[Field])
 case class Field(name: String, typ: FieldType, range: (Int, Int), init: ...)
 ```
 
-Since the IO of the generated adapter depends on the CSR specification and is therefore only determined at runtime, a way to create Chisel `Bundles` with runtime-determined fields is needed. The provided `DynamicBundle` class allows you to do exactly that. I takes a list of field name and Chisel type tuples and creates a `Bundle` with those fields. An example usage is shown below:
+Since the IO of the generated adapter depends on the CSR specification and is therefore only determined at runtime, a way to create Chisel `Bundles` with runtime-determined fields is needed. The provided `DynamicBundle` class allows you to do exactly that. It takes a list of field name and Chisel type tuples and creates a `Bundle` with those fields. An example usage is shown below:
 
 ```scala
-val myBundle = new DynamicBundle(for (i <- 0 until 4) yield s"field$i" -> UInt(i.W))
+val myBundle = new DynamicBundle(Seq.tabulate(4)(i => s"field$i" -> UInt(i.W)))
 myBundle.elements.foreach { case (name, data) =>
   println(s"$name: ${data.getWidth} bits")
 }

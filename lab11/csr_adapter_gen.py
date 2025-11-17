@@ -17,6 +17,7 @@ df = pd.read_excel(file_path, sheet_name=None)
 
 io = ""
 regs = ""
+outAssigns = ""
 writeAccess = ""
 readAccess = ""
 resetStmts = ""
@@ -58,6 +59,8 @@ def add_addr(typ, addr):
         writeableAddr.append(addrStr)
     elif typ == "rotrg":
         readableAddr.append(addrStr)
+    elif typ == "const":
+        readableAddr.append(addrStr)
 
 def indent(str, lvl):
    # indent each line
@@ -79,17 +82,15 @@ def add_reset(typ, name, width, init):
 def read_access(name, range):
     return f"{busReadData}[{range}] = {name}_reg;\n"
 
-def create_write_trg(typ, name, range):
+def create_write_trg(typ, name, address):
+    global writeTrg
     if typ == "wotrg":
-        return [f"{name}_trg = 1'b1;\n"]
-    else:
-        return []
+        writeTrg += f"assign {name}_trg = wr_access && (paddr == {address});\n"
     
-def create_read_trg(typ, name, range):
+def create_read_trg(typ, name, address):
+    global readTrg
     if typ == "rotrg":
-        return [f"{name}_trg = 1'b1;\n"]
-    else:
-        return []
+        readTrg += f"assign {name}_trg = rd_access && (paddr == {address});\n"
 
 def create_read(typ, name, range, const, width):
     if typ == "rw":
@@ -146,6 +147,13 @@ def add_io(typ, name, width):
         add_io_statement("input", name, width)
         add_io_statement("output", f"{name}_trg", 1)
 
+def add_out_assign(typ, name, width):
+    global outAssigns
+    if typ == "rw":
+        outAssigns += f"assign {name} = {name}_reg;\n"
+    elif typ == "wotrg":
+        outAssigns += f"assign {name} = {name}_reg;\n"
+
 for block in df['Map']['Name']:
   info = df['Map'][df['Map']['Name'] == block].values[0]
   base_addr = int(info[3], 16)
@@ -176,10 +184,11 @@ for block in df['Map']['Name']:
         add_reg(typ, f"{block}_{reg}", width)
         writes += create_write(typ, f"{block}_{reg}", rang)
         reads += create_read(typ, f"{block}_{reg}", rang, init, width)
-        write_trgs += create_write_trg(typ, f"{block}_{reg}", rang)
-        read_trgs += create_read_trg(typ, f"{block}_{reg}", rang)
+        create_write_trg(typ, f"{block}_{reg}", toVerilogLit(base_addr + offset, 32))
+        create_read_trg(typ, f"{block}_{reg}", toVerilogLit(base_addr + offset, 32))
         add_reset(typ, f"{block}_{reg}", width, init)
         add_addr(typ, base_addr + offset)
+        add_out_assign(typ, f"{block}_{reg}", width)
 
       else:
         print(" { ", end="")
@@ -198,19 +207,16 @@ for block in df['Map']['Name']:
             add_reg(typ, f"{block}_{reg}_{field}", width)
             writes += create_write(typ, f"{block}_{reg}_{field}", rang)
             reads += create_read(typ, f"{block}_{reg}_{field}", rang, init, width)
-            write_trgs += create_write_trg(typ, f"{block}_{reg}_{field}", rang)
-            read_trgs += create_read_trg(typ, f"{block}_{reg}_{field}", rang)
+            create_write_trg(typ, f"{block}_{reg}_{field}", toVerilogLit(base_addr + offset, 32))
+            create_read_trg(typ, f"{block}_{reg}_{field}", toVerilogLit(base_addr + offset, 32))
             add_reset(typ, f"{block}_{reg}_{field}", width, init)
             add_addr(typ, base_addr + offset)
+            add_out_assign(typ, f"{block}_{reg}_{field}", width)
         print("}")
     if writes:
         writeAccess += case_stmt(f"{toVerilogLit(base_addr + offset, 32)}", writes)
     if reads:
         readAccess += case_stmt(f"{toVerilogLit(base_addr + offset, 32)}", reads)
-    if write_trgs:
-        writeTrg += case_stmt(f"{toVerilogLit(base_addr + offset, 32)}", write_trgs)
-    if read_trgs:
-        readTrg += case_stmt(f"{toVerilogLit(base_addr + offset, 32)}", read_trgs)
   print("")
 
 
@@ -238,12 +244,22 @@ module {base_name}_adapter (
 {indent(io[:-2], 1)}
 );
 
+  // Apb state
   reg wr_access;
   reg rd_access;
+  assign pready = wr_access || rd_access;
 
+  // Internal registers
 {indent(regs,1)}
 
-  assign pready = wr_access || rd_access;
+  // Output assignments
+{indent(outAssigns,1)}
+
+  // Write triggers
+{indent(writeTrg,1)}
+
+  // Read triggers
+{indent(readTrg,1)}
 
   always_ff @(posedge clock) begin // APB phases
     if (reset) begin
@@ -267,19 +283,6 @@ module {base_name}_adapter (
     end
   end
 
-
-  always_comb begin // Read and write triggers
-    if (rd_access) begin
-      case (paddr)
-{indent(readTrg, 4)}
-      endcase
-    end else if (wr_access) begin
-      case (paddr)
-{indent(writeTrg, 4)}
-      endcase
-    end
-  end
-
   always_comb begin // APB error handling
     if (psel) begin
       if (rd_access) begin
@@ -297,12 +300,15 @@ module {base_name}_adapter (
   end
 
   always_comb begin // Read Access
+    prdata = 32'h00000000;
     if (psel) begin
       case (paddr)
 {indent(readAccess, 4)}
       endcase
     end
   end
+
+  
 
 endmodule
 """

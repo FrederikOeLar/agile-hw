@@ -91,10 +91,10 @@ case class Register(name: String, offset: Int, fields: Seq[Field])
 case class Field(name: String, typ: FieldType, range: (Int, Int), init: ...)
 ```
 
-Since the IO of the generated adapter depends on the CSR specification and is therefore only determined at runtime, a way to create Chisel `Bundles` with runtime-determined fields is needed. The provided `DynamicBundle` class allows you to do exactly that. I takes a list of field name and Chisel type tuples and creates a `Bundle` with those fields. An example usage is shown below:
+Since the IO of the generated adapter depends on the CSR specification and is therefore only determined at runtime, a way to create Chisel `Bundles` with runtime-determined fields is needed. The provided `DynamicBundle` class allows you to do exactly that. It takes a list of field name and Chisel type tuples and creates a `Bundle` with those fields. An example usage is shown below:
 
 ```scala
-val myBundle = new DynamicBundle(for (i <- 0 until 4) yield s"field$i" -> UInt(i.W))
+val myBundle = new DynamicBundle(Seq.tabulate(4)(i => s"field$i" -> UInt(i.W)))
 myBundle.elements.foreach { case (name, data) =>
   println(s"$name: ${data.getWidth} bits")
 }
@@ -113,15 +113,49 @@ class CsrAdapter(descriptionSheetPath: String) extends Module {
 }
 ```
 
-### Using the python generator
+### Using the Python generator
 
-A reference implementation of the generator is provided in Python. You can run it as follows:
+A reference implementation of the generator is provided in Python. You need to have the `pandas` and `openpyxl` packages installed. You can run it as follows:
 
 ```bash
-python3 generate_csr.py soc.xlsx
+python3 csr_adapter_gen.py soc.xlsx
 ```
 
 Take a look at the Excel source file `soc.xlsx`, the generated Verilog file `soc_adapter.sv` and finally the generator itself.
+
+### Testing
+
+Inside `src/test/scala/PythonGeneratorTest.scala`, a testbench is provided which instantiates the Python-generated CSR adapter as a blackbox and verifies its functionality for a few representative CSR's. You can use this testbench as further reference for the specification. Running the testbench requires a **Verilator** installation. The file also contains a starting point for your Chisel implementation. Use the testbench for the python generator as inspiration to create a more complete testbench for your Chisel implementation.
+
+The testbench uses a Bus Function Model (BFM) to abstract the driving of the APB interface. The BFM provides methods for reading, writing and reading with an expected value. The `Option[BigInt]` type is used to indicate whether an error occurred during the read transaction. An example usage of the BFM is shown below:
+
+```scala
+val bfm = new ApbMasterBfm( // create BFM
+  dut.clock,
+  dut.reset,
+  dut.io.psel,
+  dut.io.penable,
+  dut.io.paddr,
+  dut.io.pwrite,
+  dut.io.pwdata,
+  dut.io.prdata,
+  dut.io.pready,
+  dut.io.pslverr
+)
+
+bfm.write(address = 0x1000, data = 0xDEADBEEF) match { // perform write
+  case Some(_) => println("Write successful")
+  case None => println("Write error")
+}
+
+bfm.read(address = 0x1000) match { // perform read
+  case Some(data) => println(f"Read data: 0x$data%08X")
+  case None => println("Read error")
+}
+
+bfm.readExpect(address = 0x1000, expectedData = Some(0xDEADBEEF)) // expect read success
+bfm.readExpect(address = 0x1004, expectedData = None) // expect read error
+```
 
 ## Implementing the Chisel Generator
 
